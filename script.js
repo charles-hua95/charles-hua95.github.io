@@ -8,7 +8,7 @@ function initMap() {
     // Initialize the map
     map = new google.maps.Map(document.getElementById('map'), {
         zoom: 16,
-        center: chinatown
+        center: chinatown,
         mapId: '91bf6258df7e9ddd'
     });
 
