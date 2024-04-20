@@ -18,7 +18,7 @@ function initMap() {
 function fetchLocations() {
     const sheetId = '1tIqLf1ljbiG5Q0lf6Jcoc3I5hwFRayTCdiATgP98f38';
     const apiKey = 'AIzaSyAAWLLafU7wen4ObLkxT3rtY1jD39wne_4';
-    const range = 'A2:B100'; // Adjust the range based on your sheet's data
+    const range = 'D2:E100'; // Adjust the range based on your sheet's data
     
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${apiKey}`;
 
