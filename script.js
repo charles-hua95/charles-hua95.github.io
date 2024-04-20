@@ -18,7 +18,7 @@ function initMap() {
 function fetchLocations() {
     const sheetId = '1tIqLf1ljbiG5Q0lf6Jcoc3I5hwFRayTCdiATgP98f38';
     const apiKey = 'AIzaSyAAWLLafU7wen4ObLkxT3rtY1jD39wne_4';
-    const range = 'D2:E100'; // Adjust the range based on your sheet's data
+    const range = 'A2:L100'; // Adjust the range based on your sheet's data
     
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${apiKey}`;
 
@@ -38,8 +38,8 @@ function fetchLocations() {
                 console.log(`${rows.length} locations fetched, processing...`);
                 rows.forEach((row, index) => {
                     console.log(`Processing location ${index + 1}:`, row);
-                    const latLng = new google.maps.LatLng(row[0], row[1]);
-                    addMarker(latLng);
+                    const latLng = new google.maps.LatLng(row[3], row[4]); // Latitude and longitude are now in columns D and E respectively
+                    addMarker(latLng, row[0], row[2], row[1], row[8], row[6]); // Passing additional data for infoWindow
                 });
             } else {
                 console.log('No data found or empty rows.');
@@ -51,7 +51,7 @@ function fetchLocations() {
         });
 }
 
-function addMarker(latLng) {
+function addMarker(latLng, businessName, businessAddress, ownerName, tags, description) {
     console.log(`Adding marker at ${latLng.toString()}`);
     const marker = new google.maps.Marker({
         position: latLng,
@@ -60,17 +60,27 @@ function addMarker(latLng) {
             url: 'https://charles-hua95.github.io/theft-icon.png',
             scaledSize: new google.maps.Size(32, 32)
         },
-        title: 'Wage theft'
+        title: `${businessName}`
     });
 
-    const infoWindow = new google.maps.InfoWindow({
-        content: `<p>Marker at Latitude: ${latLng.lat()}, Longitude: ${latLng.lng()}</p>`
-    });
+    const infoContent = `
+    <div>
+        <h3>Business: ${businessName}</h3>
+        <p><strong>Address:</strong> ${businessAddress}</p>
+        <p><strong>Owner:</strong> ${ownerName}</p>
+        <p><strong>Practices:</strong> ${tags}</p>
+        <p><strong>Description:</strong> ${description}</p>
+    </div>
+`;
 
-    marker.addListener('click', () => {
-        console.log(`Marker at ${latLng.toString()} clicked.`);
-        infoWindow.open(map, marker);
-    });
+const infoWindow = new google.maps.InfoWindow({
+    content: infoContent
+});
 
-    markers.push(marker);
+marker.addListener('click', () => {
+    console.log(`Marker at ${latLng.toString()} clicked.`);
+    infoWindow.open(map, marker);
+});
+
+markers.push(marker);
 }
