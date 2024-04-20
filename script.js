@@ -22,40 +22,55 @@ function fetchLocations() {
     
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${apiKey}`;
 
+    console.log("Fetching data from Google Sheets...");
+
     fetch(url)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log("Data received from Google Sheets:", data);
             const rows = data.values;
-            if (rows.length) {
-                rows.forEach(row => {
+            if (rows && rows.length) {
+                console.log(`${rows.length} locations fetched, processing...`);
+                rows.forEach((row, index) => {
+                    console.log(`Processing location ${index + 1}:`, row);
                     const latLng = new google.maps.LatLng(row[0], row[1]);
                     addMarker(latLng);
                 });
+            } else {
+                console.log('No data found or empty rows.');
             }
         })
-        .catch(error => console.error('Error fetching data: ', error));
+        .catch(error => {
+            console.error('Error fetching data: ', error);
+            alert('Failed to load data from Google Sheets. Check the console for more details.');
+        });
 }
 
 function addMarker(latLng) {
+    console.log(`Adding marker at ${latLng.toString()}`);
     const marker = new google.maps.Marker({
         position: latLng,
         map: map,
-        // Use a custom icon if you like - specify the URL as the icon property
         icon: {
-            url: 'https://charles-hua95.github.io/charles-hua95.github.io/theft-icon.png', // URL to a custom icon
-            scaledSize: new google.maps.Size(32, 32) // Adjust size as needed
+            url: 'https://charles-hua95.github.io/charles-hua95.github.io/theft-icon.png',
+            scaledSize: new google.maps.Size(32, 32)
         },
-        title: 'Wage theft' // Tooltip for the marker
+        title: 'Wage theft'
     });
 
-    // Optional: Add an info window for each marker
     const infoWindow = new google.maps.InfoWindow({
         content: `<p>Marker at Latitude: ${latLng.lat()}, Longitude: ${latLng.lng()}</p>`
     });
 
     marker.addListener('click', () => {
+        console.log(`Marker at ${latLng.toString()} clicked.`);
         infoWindow.open(map, marker);
     });
 
-    markers.push(marker); // Optionally, keep track of all markers
+    markers.push(marker);
 }
