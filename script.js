@@ -3,15 +3,9 @@ let markers = [];
 
 var mapStyles = [
     {
-        "featureType": "transit.station.bus",
+        "featureType": "transit",
         "stylers": [
-            { "visibility": "off" }  // This hides all bus stations on the map
-        ]
-    },
-    {
-        "featureType": "transit.station.tram",
-        "stylers": [
-            { "visibility": "off" }  // This hides all tram stations on the map
+            { "visibility": "off" }
         ]
     }
 ];
