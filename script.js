@@ -57,7 +57,7 @@ function addMarker(latLng) {
         position: latLng,
         map: map,
         icon: {
-            url: 'https://charles-hua95.github.io/charles-hua95.github.io/theft-icon.png',
+            url: 'https://charles-hua95.github.io/theft-icon.png',
             scaledSize: new google.maps.Size(32, 32)
         },
         title: 'Wage theft'
