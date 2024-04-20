@@ -51,7 +51,7 @@ function fetchLocations() {
                     name: headers.indexOf("Name of Business"),
                     address: headers.indexOf("Address of Business"),
                     owner: headers.indexOf("Name of Owner"),
-                    tags: headers.indexOf("Tags"),
+                    tags: headers.indexOf("Bad Practices (Tags)"),
                     description: headers.indexOf("Description"),
                     latitude: headers.indexOf("Latitude"),
                     longitude: headers.indexOf("Longitude"),
