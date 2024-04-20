@@ -45,6 +45,7 @@ function fetchLocations() {
                     description: headers.indexOf("Description"),
                     latitude: headers.indexOf("Latitude"),
                     longitude: headers.indexOf("Longitude")
+                    placeId: headers.indexOf("Place ID")
                 };
 
                 console.log(`Column indices found:`, columnIndices);
@@ -52,7 +53,7 @@ function fetchLocations() {
                 // Process each row excluding the header
                 rows.slice(1).forEach(row => {
                     const latLng = new google.maps.LatLng(row[columnIndices.latitude], row[columnIndices.longitude]);
-                    addMarker(latLng, row[columnIndices.name], row[columnIndices.address], row[columnIndices.owner], row[columnIndices.tags], row[columnIndices.description]);
+                    addMarker(latLng, row[columnIndices.name], row[columnIndices.address], row[columnIndices.owner], row[columnIndices.tags], row[columnIndices.description], row[columnIndices.placeId]);
                 });
             } else {
                 console.log('No data found or empty rows.');
