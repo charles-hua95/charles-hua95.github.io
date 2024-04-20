@@ -18,7 +18,7 @@ function initMap() {
 function fetchLocations() {
     const sheetId = '1tIqLf1ljbiG5Q0lf6Jcoc3I5hwFRayTCdiATgP98f38';
     const apiKey = 'AIzaSyAAWLLafU7wen4ObLkxT3rtY1jD39wne_4';
-    const range = 'A2:L100'; // Adjust the range based on your sheet's data
+    const range = 'A1:L100';
     
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${apiKey}`;
 
@@ -34,13 +34,25 @@ function fetchLocations() {
         .then(data => {
             console.log("Data received from Google Sheets:", data);
             const rows = data.values;
-            if (rows && rows.length) {
-                console.log(`${rows.length} locations fetched, processing...`);
-                rows.forEach((row, index) => {
-                    console.log(`Processing location ${index + 1}:`, row);
-                    const latLng = new google.maps.LatLng(row[3], row[4]); // Latitude and longitude are now in columns D and E respectively
-                    addMarker(latLng, row[0], row[2], row[1], row[8], row[6]); // Passing additional data for infoWindow
-                });
+            if (rows && rows.length > 1) {
+                // Extract headers and find indices
+                const headers = rows[0];
+                const nameIndex = headers.indexOf("Name of Business");
+                const addressIndex = headers.indexOf("Address of Business");
+                const ownerIndex = headers.indexOf("Name of Owner");
+                const tagsIndex = headers.indexOf("Bad Practices (Tags)");
+                const descriptionIndex = headers.indexOf("Description");
+                const latIndex = headers.indexOf("Latitude");
+                const lngIndex = headers.indexOf("Longitude");
+
+                console.log(`Found indices - Name: ${nameIndex}, Address: ${addressIndex}, Owner: ${ownerIndex}, Tags: ${tagsIndex}, Description: ${descriptionIndex}, Latitude: ${latIndex}, Longitude: ${lngIndex}`);
+
+                // Process each row excluding the header
+                for (let i = 1; i < rows.length; i++) {
+                    let row = rows[i];
+                    const latLng = new google.maps.LatLng(row[latIndex], row[lngIndex]);
+                    addMarker(latLng, row[nameIndex], row[addressIndex], row[ownerIndex], row[tagsIndex], row[descriptionIndex]);
+                }
             } else {
                 console.log('No data found or empty rows.');
             }
@@ -65,8 +77,7 @@ function addMarker(latLng, businessName, businessAddress, ownerName, tags, descr
 
     const infoContent = `
     <div>
-        <h3>Business: ${businessName}</h3>
-        <p><strong>Address:</strong> ${businessAddress}</p>
+        <h3>Business: ${businessName}</h3> Address:</strong> ${businessAddress}
         <p><strong>Owner:</strong> ${ownerName}</p>
         <p><strong>Practices:</strong> ${tags}</p>
         <p><strong>Description:</strong> ${description}</p>
