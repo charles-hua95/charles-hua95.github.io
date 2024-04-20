@@ -59,5 +59,3 @@ function addMarker(latLng) {
 
     markers.push(marker); // Optionally, keep track of all markers
 }
-
-document.addEventListener('DOMContentLoaded', initMap);
