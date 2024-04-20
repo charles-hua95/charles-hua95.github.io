@@ -76,23 +76,42 @@ function addMarker(latLng, businessName, businessAddress, ownerName, tags, descr
         title: `${businessName}`
     });
 
-    const infoContent = `
+    let contentString = `
     <div>
         <h3>Business: ${businessName}</h3> Address:</strong> ${businessAddress}
+        <div id="placePhoto-${placeId}"><em>Loading photo...</em></div>
         <p><strong>Owner:</strong> ${ownerName}</p>
         <p><strong>Practices:</strong> ${tags}</p>
         <p><strong>Description:</strong> ${description}</p>
     </div>
-`;
+    `;
 
-const infoWindow = new google.maps.InfoWindow({
-    content: infoContent
-});
+    const infoWindow = new google.maps.InfoWindow({
+        content: contentString
+    });
+    google.maps.event.addListener(marker, 'click', function () {
+        infoWindow.open(map, marker);
+        loadPlacePhoto(placeId, `placePhoto-${placeId}`);
+    });
 
-marker.addListener('click', () => {
-    console.log(`Marker at ${latLng.toString()} clicked.`);
-    infoWindow.open(map, marker);
-});
+    markers.push(marker);
+}
 
-markers.push(marker);
+function loadPlacePhoto(placeId, containerId) {
+    const service = new google.maps.places.PlacesService(map);
+    service.getDetails({
+        placeId: placeId,
+        fields: ['photo']
+    }, function (place, status) {
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
+            if (place.photos && place.photos.length > 0) {
+                const photoUrl = place.photos[0].getUrl({'maxWidth': 200, 'maxHeight': 200});
+                document.getElementById(containerId).innerHTML = `<img src="${photoUrl}" alt="Place Image">`;
+            } else {
+                document.getElementById(containerId).innerHTML = '<p>No Image Available</p>';
+            }
+        } else {
+            document.getElementById(containerId).innerHTML = '<p>Photo not found</p>';
+        }
+    });
 }
