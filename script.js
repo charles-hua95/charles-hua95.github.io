@@ -72,6 +72,9 @@ function addMarker(latLng, businessName, businessAddress, ownerName, tags, descr
     if (businessName) {
         contentString += `<h3>Business: ${businessName}</h3>`;
     }
+    if (placeId) {
+        contentString += `<div id="placePhoto-${placeId}"><em>Loading photo...</em></div>`;
+    }
     if (businessAddress) {
         contentString += `<p><strong>Address:</strong> ${businessAddress}</p>`;
     }
@@ -83,9 +86,6 @@ function addMarker(latLng, businessName, businessAddress, ownerName, tags, descr
     }
     if (description) {
         contentString += `<p><strong>Description:</strong> ${description}</p>`;
-    }
-    if (placeId) {
-        contentString += `<div id="placePhoto-${placeId}"><em>Loading photo...</em></div>`;
     }
 
     contentString += '</div>';
