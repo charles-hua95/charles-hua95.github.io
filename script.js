@@ -9,6 +9,7 @@ function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
         zoom: 16,
         center: chinatown
+        mapId: '91bf6258df7e9ddd'
     });
 
     // Fetch locations from Google Sheet and place markers
