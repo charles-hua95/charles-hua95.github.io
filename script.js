@@ -111,18 +111,26 @@ function addMarker(latLng, businessName, businessAddress, ownerName, tags, descr
         map: map,
         icon: {
             url: 'https://charles-hua95.github.io/theft-icon.png',
-            scaledSize: new google.maps.Size(32, 32)
+            scaledSize: new google.maps.Size(50, 50)
         },
         title: `${businessName}`
     });
+
+    let isOpen = false;  // Track whether the infoWindow is open
+
     google.maps.event.addListener(marker, 'click', function () {
-        infoWindow.open(map, marker);
-        if (placeId) {  // Load the photo if placeId is present
-            loadPlacePhoto(placeId, `placePhoto-${placeId}`);
+        if (isOpen) {
+            infoWindow.close();
+            isOpen = false;  // Update the state to closed
         } else {
-            document.getElementById(`placePhoto-${placeId}`).innerHTML = '';
+            infoWindow.open(map, marker);
+            isOpen = true;   // Update the state to open
+            if (placeId) {  // Load the photo if placeId is present
+                loadPlacePhoto(placeId, `placePhoto-${placeId}`);
+            } else {
+                document.getElementById(`placePhoto-${placeId}`).innerHTML = '';
         }
-    });
+    }});
 
     markers.push(marker);
 }
