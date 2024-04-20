@@ -37,22 +37,23 @@ function fetchLocations() {
             if (rows && rows.length > 1) {
                 // Extract headers and find indices
                 const headers = rows[0];
-                const nameIndex = headers.indexOf("Name of Business");
-                const addressIndex = headers.indexOf("Address of Business");
-                const ownerIndex = headers.indexOf("Name of Owner");
-                const tagsIndex = headers.indexOf("Bad Practices (Tags)");
-                const descriptionIndex = headers.indexOf("Description");
-                const latIndex = headers.indexOf("Latitude");
-                const lngIndex = headers.indexOf("Longitude");
+                const columnIndices = {
+                    name: headers.indexOf("Name of Business"),
+                    address: headers.indexOf("Address of Business"),
+                    owner: headers.indexOf("Name of Owner"),
+                    tags: headers.indexOf("Tags"),
+                    description: headers.indexOf("Description"),
+                    latitude: headers.indexOf("Latitude"),
+                    longitude: headers.indexOf("Longitude")
+                };
 
-                console.log(`Found indices - Name: ${nameIndex}, Address: ${addressIndex}, Owner: ${ownerIndex}, Tags: ${tagsIndex}, Description: ${descriptionIndex}, Latitude: ${latIndex}, Longitude: ${lngIndex}`);
+                console.log(`Column indices found:`, columnIndices);
 
                 // Process each row excluding the header
-                for (let i = 1; i < rows.length; i++) {
-                    let row = rows[i];
-                    const latLng = new google.maps.LatLng(row[latIndex], row[lngIndex]);
-                    addMarker(latLng, row[nameIndex], row[addressIndex], row[ownerIndex], row[tagsIndex], row[descriptionIndex]);
-                }
+                rows.slice(1).forEach(row => {
+                    const latLng = new google.maps.LatLng(row[columnIndices.latitude], row[columnIndices.longitude]);
+                    addMarker(latLng, row[columnIndices.name], row[columnIndices.address], row[columnIndices.owner], row[columnIndices.tags], row[columnIndices.description]);
+                });
             } else {
                 console.log('No data found or empty rows.');
             }
