@@ -44,7 +44,7 @@ function fetchLocations() {
                     tags: headers.indexOf("Tags"),
                     description: headers.indexOf("Description"),
                     latitude: headers.indexOf("Latitude"),
-                    longitude: headers.indexOf("Longitude")
+                    longitude: headers.indexOf("Longitude"),
                     placeId: headers.indexOf("Place ID")
                 };
 
@@ -65,7 +65,7 @@ function fetchLocations() {
         });
 }
 
-function addMarker(latLng, businessName, businessAddress, ownerName, tags, description) {
+function addMarker(latLng, businessName, businessAddress, ownerName, tags, description, placeId) {
     console.log(`Adding marker at ${latLng.toString()}`);
     const marker = new google.maps.Marker({
         position: latLng,
