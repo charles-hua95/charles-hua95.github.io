@@ -2,13 +2,13 @@ let map;
 let markers = [];
 
 function initMap() {
-    // Coordinates for Toronto
-    const toronto = {lat: 43.653023233458946, lng: -79.39743229321462};
+    // Coordinates for chinatown
+    const chinatown = {lat: 43.653023233458946, lng: -79.39743229321462};
     
     // Initialize the map
     map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 15,
-        center: toronto
+        zoom: 16,
+        center: chinatown
     });
 
     // Fetch locations from Google Sheet and place markers
@@ -66,7 +66,36 @@ function fetchLocations() {
 }
 
 function addMarker(latLng, businessName, businessAddress, ownerName, tags, description, placeId) {
+
+    let contentString = '<div>';
+
+    if (businessName) {
+        contentString += `<h3>Business: ${businessName}</h3>`;
+    }
+    if (businessAddress) {
+        contentString += `<p><strong>Address:</strong> ${businessAddress}</p>`;
+    }
+    if (ownerName) {
+        contentString += `<p><strong>Owner:</strong> ${ownerName}</p>`;
+    }
+    if (tags) {
+        contentString += `<p><strong>Practices:</strong> ${tags}</p>`;
+    }
+    if (description) {
+        contentString += `<p><strong>Description:</strong> ${description}</p>`;
+    }
+    if (placeId) {
+        contentString += `<div id="placePhoto-${placeId}"><em>Loading photo...</em></div>`;
+    }
+
+    contentString += '</div>';
+
+    const infoWindow = new google.maps.InfoWindow({
+        content: contentString
+    });
+    
     console.log(`Adding marker at ${latLng.toString()}`);
+
     const marker = new google.maps.Marker({
         position: latLng,
         map: map,
@@ -76,23 +105,13 @@ function addMarker(latLng, businessName, businessAddress, ownerName, tags, descr
         },
         title: `${businessName}`
     });
-
-    let contentString = `
-    <div>
-        <h3>Business: ${businessName}</h3> Address:</strong> ${businessAddress}
-        <div id="placePhoto-${placeId}"><em>Loading photo...</em></div>
-        <p><strong>Owner:</strong> ${ownerName}</p>
-        <p><strong>Practices:</strong> ${tags}</p>
-        <p><strong>Description:</strong> ${description}</p>
-    </div>
-    `;
-
-    const infoWindow = new google.maps.InfoWindow({
-        content: contentString
-    });
     google.maps.event.addListener(marker, 'click', function () {
         infoWindow.open(map, marker);
-        loadPlacePhoto(placeId, `placePhoto-${placeId}`);
+        if (placeId) {  // Load the photo if placeId is present
+            loadPlacePhoto(placeId, `placePhoto-${placeId}`);
+        } else {
+            document.getElementById(`placePhoto-${placeId}`).innerHTML = '';
+        }
     });
 
     markers.push(marker);
@@ -104,15 +123,13 @@ function loadPlacePhoto(placeId, containerId) {
         placeId: placeId,
         fields: ['photo']
     }, function (place, status) {
-        if (status === google.maps.places.PlacesServiceStatus.OK) {
-            if (place.photos && place.photos.length > 0) {
-                const photoUrl = place.photos[0].getUrl({'maxWidth': 200, 'maxHeight': 200});
-                document.getElementById(containerId).innerHTML = `<img src="${photoUrl}" alt="Place Image">`;
-            } else {
-                document.getElementById(containerId).innerHTML = '<p>No Image Available</p>';
-            }
+        if (status === google.maps.places.PlacesServiceStatus.OK && place.photos && place.photos.length > 0) {
+            const photoUrl = place.photos[0].getUrl({'maxWidth': 200, 'maxHeight': 200});
+            const photoHtml = `<img src="${photoUrl}" alt="Place Image" style="width:100%; height:auto;">`;
+            document.getElementById(containerId).innerHTML = photoHtml;
         } else {
-            document.getElementById(containerId).innerHTML = '<p>Photo not found</p>';
+            // Clear the container or leave it unchanged depending on desired behavior
+            document.getElementById(containerId).innerHTML = ''; // Clears the photo container if no photo is found
         }
     });
 }
