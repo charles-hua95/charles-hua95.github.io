@@ -66,9 +66,10 @@ async function removeGoogleMapsScript() {
 
 // Initial setup, run when the window loads
 window.onload = function() {
-    loadGoogleMapsAPI(currentLanguage === 'en' ? 'en' : 'zh-CN');
+    currentLanguage = 'zh-CN'; // Default language
+    updateLanguage();
+    loadGoogleMapsAPI(currentLanguage);
 };
-
 // Initialize the map
 window.initMap = function() {
     const chinatown = {lat: 43.653023233458946, lng: -79.39743229321462};
@@ -82,11 +83,14 @@ window.initMap = function() {
 
 // Update language of the page elements and re-fetch locations
 function updateLanguage() {
+    document.documentElement.lang = currentLanguage === 'en' ? 'en' : 'zh-CN';
     document.getElementById('pageTitle').textContent = translations[currentLanguage].pageTitle;
     markers.forEach(marker => marker.setMap(null));
     markers = [];
     fetchLocations();
 }
+
+
 function fetchLocations() {
     const sheetId = '1tIqLf1ljbiG5Q0lf6Jcoc3I5hwFRayTCdiATgP98f38';
     const apiKey = 'AIzaSyAAWLLafU7wen4ObLkxT3rtY1jD39wne_4';

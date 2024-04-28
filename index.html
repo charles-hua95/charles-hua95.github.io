@@ -9,8 +9,15 @@
         <option value="en">English</option>
         <option value="zh-CN" selected>中文</option>
     </select>
+    <script>
+        document.getElementById('languageSelect').addEventListener('change', function() {
+            currentLanguage = this.value;
+            updateLanguage();
+            loadGoogleMapsAPI(currentLanguage);
+        });
+    </script>
     <h1 id="pageTitle">工資盜竊地圖</h1>
-    <div id="map" style="width: 100%; height: 400px;"></div>
+    <div id="map" style="width: 100%; height: 100%;"></div>
     <div id="notification" style="display: none;"></div>
     <script src="script.js"></script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAAWLLafU7wen4ObLkxT3rtY1jD39wne_4&callback=initMap&libraries=places"></script>
