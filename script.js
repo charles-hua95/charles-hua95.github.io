@@ -35,6 +35,10 @@ const translations = {
 
 // Function to dynamically load Google Maps API with selected language
 function loadGoogleMapsAPI(language) {
+    const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+    if (existingScript) {
+        document.head.removeChild(existingScript);
+    }
     const script = document.createElement('script');
     script.type = 'text/javascript';
     script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAAWLLafU7wen4ObLkxT3rtY1jD39wne_4&callback=initMap&libraries=places&language=${language}`;
@@ -44,14 +48,21 @@ function loadGoogleMapsAPI(language) {
 }
 
 // Event listener for language selection change
-document.getElementById('languageSelect').addEventListener('change', function() {
+document.getElementById('languageSelect').addEventListener('change', async function() {
     currentLanguage = this.value;
     updateLanguage();
-    document.head.querySelectorAll('script[src*="maps.googleapis.com"]').forEach(script => script.remove()); // Remove existing script
-    setTimeout(() => {
-        loadGoogleMapsAPI(currentLanguage === 'en' ? 'en' : 'zh-CN');
-    }, 100);
+    await removeGoogleMapsScript();
+    loadGoogleMapsAPI(currentLanguage === 'en' ? 'en' : 'zh-CN');
 });
+
+async function removeGoogleMapsScript() {
+    const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
+    if (existingScript) {
+        document.head.removeChild(existingScript);
+    }
+    // Ensure the script is removed before resolving the Promise
+    return Promise.resolve();
+}
 
 // Initial setup, run when the window loads
 window.onload = function() {
@@ -127,7 +138,7 @@ function fetchLocations() {
 }
 
 function addMarker(latLng, businessName, businessAddress, ownerName, tags, description, placeId) {
-    const trans = translations[currentLanguage];
+    const trans = translations[currentLanguage] || translations['zh']; // Fallback to Chinese if undefined
     let contentString = `<div><h3>${trans.businessLabel}: ${businessName}</h3>`;
     if (placeId) {
         contentString += `<div id="placePhoto-${placeId}"><em>${trans.loadingText}</em></div>`;
