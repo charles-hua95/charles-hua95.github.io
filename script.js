@@ -33,7 +33,19 @@ const translations = {
     }
 };
 
-// Function to dynamically load Google Maps API with selected language
+
+document.getElementById('langEnBtn').addEventListener('click', function() {
+    currentLanguage = 'en';
+    updateLanguage();
+    loadGoogleMapsAPI(currentLanguage);
+});
+
+document.getElementById('langZhBtn').addEventListener('click', function() {
+    currentLanguage = 'zh-CN';
+    updateLanguage();
+    loadGoogleMapsAPI(currentLanguage);
+});
+
 function loadGoogleMapsAPI(language) {
     const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
     if (existingScript) {
@@ -47,29 +59,19 @@ function loadGoogleMapsAPI(language) {
     document.head.appendChild(script);
 }
 
-// Event listener for language selection change
-document.getElementById('languageSelect').addEventListener('change', async function() {
-    currentLanguage = this.value;
-    updateLanguage();
-    await removeGoogleMapsScript();
-    loadGoogleMapsAPI(currentLanguage === 'en' ? 'en' : 'zh-CN');
-});
-
-async function removeGoogleMapsScript() {
-    const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
-    if (existingScript) {
-        document.head.removeChild(existingScript);
-    }
-    // Ensure the script is removed before resolving the Promise
-    return Promise.resolve();
+function updateLanguage() {
+    document.documentElement.lang = currentLanguage;
+    document.getElementById('pageTitle').textContent = translations[currentLanguage].pageTitle;
+    markers.forEach(marker => marker.setMap(null));
+    markers = [];
+    fetchLocations();
 }
-
-// Initial setup, run when the window loads
 window.onload = function() {
-    currentLanguage = 'zh-CN'; // Default language
     updateLanguage();
     loadGoogleMapsAPI(currentLanguage);
 };
+
+
 // Initialize the map
 window.initMap = function() {
     const chinatown = {lat: 43.653023233458946, lng: -79.39743229321462};
@@ -80,16 +82,6 @@ window.initMap = function() {
     });
     fetchLocations();
 }
-
-// Update language of the page elements and re-fetch locations
-function updateLanguage() {
-    document.documentElement.lang = currentLanguage === 'en' ? 'en' : 'zh-CN';
-    document.getElementById('pageTitle').textContent = translations[currentLanguage].pageTitle;
-    markers.forEach(marker => marker.setMap(null));
-    markers = [];
-    fetchLocations();
-}
-
 
 function fetchLocations() {
     const sheetId = '1tIqLf1ljbiG5Q0lf6Jcoc3I5hwFRayTCdiATgP98f38';
