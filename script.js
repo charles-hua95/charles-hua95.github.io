@@ -1,7 +1,7 @@
 let map;
 let markers = [];
 
-var mapStyles = [
+const mapStyles = [
     {
         "featureType": "transit",
         "stylers": [
@@ -10,21 +10,70 @@ var mapStyles = [
     }
 ];
 
-function initMap() {
-    // Coordinates for chinatown
+let currentLanguage = 'zh-CN';
+
+const translations = {
+    en: {
+        pageTitle: "Wage Theft Map",
+        businessLabel: "Business",
+        addressLabel: "Address",
+        ownerLabel: "Owner",
+        practicesLabel: "Practices",
+        descriptionLabel: "Description",
+        loadingText: "Loading photo..."
+    },
+    zh: {
+        pageTitle: "工資盜竊地圖",
+        businessLabel: "商業名稱",
+        addressLabel: "地址",
+        ownerLabel: "業主",
+        practicesLabel: "惡劣行為",
+        descriptionLabel: "描述",
+        loadingText: "加載中..."
+    }
+};
+
+// Function to dynamically load Google Maps API with selected language
+function loadGoogleMapsAPI(language) {
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAAWLLafU7wen4ObLkxT3rtY1jD39wne_4&callback=initMap&libraries=places&language=${language}`;
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+}
+
+// Event listener for language selection change
+document.getElementById('languageSelect').addEventListener('change', function() {
+    currentLanguage = this.value;
+    updateLanguage();
+    document.head.querySelectorAll('script[src*="maps.googleapis.com"]').forEach(script => script.remove()); // Remove existing script
+    loadGoogleMapsAPI(currentLanguage === 'en' ? 'en' : 'zh-CN'); // Reload map in new language
+});
+
+// Initial setup, run when the window loads
+window.onload = function() {
+    loadGoogleMapsAPI(currentLanguage === 'en' ? 'en' : 'zh-CN');
+};
+
+// Initialize the map
+window.initMap = function() {
     const chinatown = {lat: 43.653023233458946, lng: -79.39743229321462};
-    
-    // Initialize the map
     map = new google.maps.Map(document.getElementById('map'), {
         zoom: 16,
         center: chinatown,
         styles: mapStyles
     });
-
-    // Fetch locations from Google Sheet and place markers
     fetchLocations();
 }
 
+// Update language of the page elements and re-fetch locations
+function updateLanguage() {
+    document.getElementById('pageTitle').textContent = translations[currentLanguage].pageTitle;
+    markers.forEach(marker => marker.setMap(null));
+    markers = [];
+    fetchLocations();
+}
 function fetchLocations() {
     const sheetId = '1tIqLf1ljbiG5Q0lf6Jcoc3I5hwFRayTCdiATgP98f38';
     const apiKey = 'AIzaSyAAWLLafU7wen4ObLkxT3rtY1jD39wne_4';
@@ -75,51 +124,9 @@ function fetchLocations() {
         });
 }
 
-let currentLanguage = 'en';
-
-const translations = {
-    en: {
-        pageTitle: "Wage Theft Map",
-        businessLabel: "Business",
-        addressLabel: "Address",
-        ownerLabel: "Owner",
-        practicesLabel: "Practices",
-        descriptionLabel: "Description",
-        loadingText: "Loading photo..."
-    },
-    zh: {
-        pageTitle: "工資盜竊地圖",
-        businessLabel: "商業名稱",
-        addressLabel: "地址",
-        ownerLabel: "業主",
-        practicesLabel: "惡劣行為",
-        descriptionLabel: "描述",
-        loadingText: "加載中..."
-    }
-};
-
-document.getElementById('languageSelect').addEventListener('change', function() {
-    currentLanguage = this.value;
-    updateLanguage();
-    initMap(); // Reinitialize the map to refresh markers and texts
-});
-
-function updateLanguage() {
-    document.getElementById('pageTitle').textContent = translations[currentLanguage].pageTitle;
-    markers.forEach(marker => {
-        marker.setMap(null); // Remove existing markers
-    });
-    markers = [];
-    fetchLocations(); // Refetch locations and add markers with new language settings
-}
-
 function addMarker(latLng, businessName, businessAddress, ownerName, tags, description, placeId) {
     const trans = translations[currentLanguage];
     let contentString = `<div><h3>${trans.businessLabel}: ${businessName}</h3>`;
-
-    if (businessName) {
-        contentString += `<h3>Business: ${businessName}</h3>`;
-    }
     if (placeId) {
         contentString += `<div id="placePhoto-${placeId}"><em>Loading photo...</em></div>`;
     }
