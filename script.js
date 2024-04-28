@@ -164,12 +164,11 @@ function addMarker(latLng, businessName, businessAddress, ownerName, tagsString,
     
     const tags = tagsString ? tagsString.split(", ").map(tag => tag.trim().toLowerCase()) : [];
 
-    // Determine the icon based on the tags
     let iconUrl = iconUrls.defaultIcon; // Default icon
-    if (tags.includes("wage theft")) {
-        iconUrl = iconUrls.wageTheft; // icon for wage theft
-    } else if (tags.includes("abusive management") || tags.includes("intimidation")) {
+    if (tags.includes("abusive management") || tags.includes("intimidation")) {
         iconUrl = iconUrls.otherIssues; // icon for other issues
+    } else if (tags.includes("wage theft")) {
+        iconUrl = iconUrls.wageTheft; // icon for wage theft
     }
 
     console.log(`Adding marker at ${latLng.toString()}`);
