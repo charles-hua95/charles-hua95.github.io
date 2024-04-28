@@ -128,7 +128,7 @@ function addMarker(latLng, businessName, businessAddress, ownerName, tags, descr
     const trans = translations[currentLanguage];
     let contentString = `<div><h3>${trans.businessLabel}: ${businessName}</h3>`;
     if (placeId) {
-        contentString += `<div id="placePhoto-${placeId}"><em>Loading photo...</em></div>`;
+        contentString += `<div id="placePhoto-${placeId}"><em>${trans.loadingText}</em></div>`;
     }
     if (businessAddress) {
         contentString += `<p><strong>${trans.addressLabel}:</strong> ${businessAddress}</p>`;
