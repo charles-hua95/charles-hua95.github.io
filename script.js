@@ -111,7 +111,7 @@ function fetchLocations() {
                     name: headers.indexOf("Name of Business"),
                     address: headers.indexOf("Address of Business"),
                     owner: headers.indexOf("Name of Owner"),
-                    tags: headers.indexOf("Bad Practices (Tags)"),
+                    tagsString: headers.indexOf("Bad Practices (Tags)"),
                     description: headers.indexOf("Description"),
                     latitude: headers.indexOf("Latitude"),
                     longitude: headers.indexOf("Longitude"),
@@ -141,7 +141,7 @@ const iconUrls = {
     otherIssues: 'https://charles-hua95.github.io/abuse.png' // Specific URL for "Abusive management" or "Intimidation"
 };
 
-function addMarker(latLng, businessName, businessAddress, ownerName, tags, description, placeId) {
+function addMarker(latLng, businessName, businessAddress, ownerName, tagsString, description, placeId) {
     const trans = translations[currentLanguage] || translations['zh-CN']; // Fallback to Chinese if undefined
     let contentString = `<div><h3>${trans.businessLabel}: ${businessName}</h3>`;
     if (placeId) {
@@ -153,19 +153,17 @@ function addMarker(latLng, businessName, businessAddress, ownerName, tags, descr
     if (ownerName) {
         contentString += `<p><strong>${trans.ownerLabel}:</strong> ${ownerName}</p>`;
     }
-    if (tags) {
-        contentString += `<p><strong>${trans.practicesLabel}:</strong> ${tags}</p>`;
+    if (tagsString) {
+        contentString += `<p><strong>${trans.practicesLabel}:</strong> ${tagsString}</p>`;
     }
     if (description) {
         contentString += `<p><strong>${trans.descriptionLabel}:</strong> ${description}</p>`;
     }
 
     contentString += '</div>';
-
-    const infoWindow = new google.maps.InfoWindow({
-        content: contentString
-    });
     
+    const tags = tagsString ? tagsString.split(", ") : [];
+
     // Determine the icon based on the tags
     let iconUrl = iconUrls.defaultIcon; // Default icon
     if (tags.includes("Wage theft")) {
@@ -185,6 +183,11 @@ function addMarker(latLng, businessName, businessAddress, ownerName, tags, descr
         },
         title: `${businessName}`
     });
+    
+    const infoWindow = new google.maps.InfoWindow({
+        content: contentString
+    });
+    
 
     let isOpen = false;  // Track whether the infoWindow is open
 
