@@ -75,9 +75,47 @@ function fetchLocations() {
         });
 }
 
-function addMarker(latLng, businessName, businessAddress, ownerName, tags, description, placeId) {
+let currentLanguage = 'en';
 
-    let contentString = '<div>';
+const translations = {
+    en: {
+        pageTitle: "Wage Theft Map",
+        businessLabel: "Business",
+        addressLabel: "Address",
+        ownerLabel: "Owner",
+        practicesLabel: "Practices",
+        descriptionLabel: "Description",
+        loadingText: "Loading photo..."
+    },
+    zh: {
+        pageTitle: "工資盜竊地圖",
+        businessLabel: "商業名稱",
+        addressLabel: "地址",
+        ownerLabel: "業主",
+        practicesLabel: "惡劣行為",
+        descriptionLabel: "描述",
+        loadingText: "加載中..."
+    }
+};
+
+document.getElementById('languageSelect').addEventListener('change', function() {
+    currentLanguage = this.value;
+    updateLanguage();
+    initMap(); // Reinitialize the map to refresh markers and texts
+});
+
+function updateLanguage() {
+    document.getElementById('pageTitle').textContent = translations[currentLanguage].pageTitle;
+    markers.forEach(marker => {
+        marker.setMap(null); // Remove existing markers
+    });
+    markers = [];
+    fetchLocations(); // Refetch locations and add markers with new language settings
+}
+
+function addMarker(latLng, businessName, businessAddress, ownerName, tags, description, placeId) {
+    const trans = translations[currentLanguage];
+    let contentString = `<div><h3>${trans.businessLabel}: ${businessName}</h3>`;
 
     if (businessName) {
         contentString += `<h3>Business: ${businessName}</h3>`;
@@ -86,16 +124,16 @@ function addMarker(latLng, businessName, businessAddress, ownerName, tags, descr
         contentString += `<div id="placePhoto-${placeId}"><em>Loading photo...</em></div>`;
     }
     if (businessAddress) {
-        contentString += `<p><strong>Address:</strong> ${businessAddress}</p>`;
+        contentString += `<p><strong>${trans.addressLabel}:</strong> ${businessAddress}</p>`;
     }
     if (ownerName) {
-        contentString += `<p><strong>Owner:</strong> ${ownerName}</p>`;
+        contentString += `<p><strong>${trans.ownerLabel}:</strong> ${ownerName}</p>`;
     }
     if (tags) {
-        contentString += `<p><strong>Practices:</strong> ${tags}</p>`;
+        contentString += `<p><strong>${trans.practicesLabel}:</strong> ${tags}</p>`;
     }
     if (description) {
-        contentString += `<p><strong>Description:</strong> ${description}</p>`;
+        contentString += `<p><strong>${trans.descriptionLabel}:</strong> ${description}</p>`;
     }
 
     contentString += '</div>';
