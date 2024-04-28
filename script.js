@@ -135,8 +135,14 @@ function fetchLocations() {
         });
 }
 
+const iconUrls = {
+    defaultIcon: 'https://charles-hua95.github.io/basic-icon.png', // No specific tag
+    wageTheft: 'https://charles-hua95.github.io/theft-icon.png', // Specific URL for "Wage theft"
+    otherIssues: 'https://charles-hua95.github.io/abuse.png' // Specific URL for "Abusive management" or "Intimidation"
+};
+
 function addMarker(latLng, businessName, businessAddress, ownerName, tags, description, placeId) {
-    const trans = translations[currentLanguage] || translations['zh']; // Fallback to Chinese if undefined
+    const trans = translations[currentLanguage] || translations['zh-CN']; // Fallback to Chinese if undefined
     let contentString = `<div><h3>${trans.businessLabel}: ${businessName}</h3>`;
     if (placeId) {
         contentString += `<div id="placePhoto-${placeId}"><em>${trans.loadingText}</em></div>`;
@@ -160,13 +166,21 @@ function addMarker(latLng, businessName, businessAddress, ownerName, tags, descr
         content: contentString
     });
     
+    // Determine the icon based on the tags
+    let iconUrl = iconUrls.defaultIcon; // Default icon
+    if (tags.includes("Wage theft")) {
+        iconUrl = iconUrls.wageTheft; // icon for wage theft
+    } else if (tags.includes("Abusive management") || tags.includes("Intimidation")) {
+        iconUrl = iconUrls.otherIssues; // icon for other issues
+    }
+
     console.log(`Adding marker at ${latLng.toString()}`);
 
     const marker = new google.maps.Marker({
         position: latLng,
         map: map,
         icon: {
-            url: 'https://charles-hua95.github.io/theft-icon.png',
+            url: iconUrl,
             scaledSize: new google.maps.Size(50, 50)
         },
         title: `${businessName}`
