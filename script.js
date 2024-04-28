@@ -22,7 +22,7 @@ const translations = {
         descriptionLabel: "Description",
         loadingText: "Loading photo..."
     },
-    zh: {
+    'zh-CN': {
         pageTitle: "工資盜竊地圖",
         businessLabel: "商業名稱",
         addressLabel: "地址",
@@ -46,6 +46,14 @@ document.getElementById('langZhBtn').addEventListener('click', function() {
     loadGoogleMapsAPI(currentLanguage);
 });
 
+function updateLanguage() {
+    document.documentElement.lang = currentLanguage;
+    document.getElementById('pageTitle').textContent = translations[currentLanguage].pageTitle;
+    markers.forEach(marker => marker.setMap(null));
+    markers = [];
+    fetchLocations();
+}
+
 function loadGoogleMapsAPI(language) {
     const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
     if (existingScript) {
@@ -59,13 +67,7 @@ function loadGoogleMapsAPI(language) {
     document.head.appendChild(script);
 }
 
-function updateLanguage() {
-    document.documentElement.lang = currentLanguage;
-    document.getElementById('pageTitle').textContent = translations[currentLanguage].pageTitle;
-    markers.forEach(marker => marker.setMap(null));
-    markers = [];
-    fetchLocations();
-}
+
 window.onload = function() {
     updateLanguage();
     loadGoogleMapsAPI(currentLanguage);
