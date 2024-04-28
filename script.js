@@ -48,7 +48,9 @@ document.getElementById('languageSelect').addEventListener('change', function() 
     currentLanguage = this.value;
     updateLanguage();
     document.head.querySelectorAll('script[src*="maps.googleapis.com"]').forEach(script => script.remove()); // Remove existing script
-    loadGoogleMapsAPI(currentLanguage === 'en' ? 'en' : 'zh-CN'); // Reload map in new language
+    setTimeout(() => {
+        loadGoogleMapsAPI(currentLanguage === 'en' ? 'en' : 'zh-CN');
+    }, 100);
 });
 
 // Initial setup, run when the window loads
