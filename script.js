@@ -123,7 +123,7 @@ function fetchLocations() {
                 // Process each row excluding the header
                 rows.slice(1).forEach(row => {
                     const latLng = new google.maps.LatLng(row[columnIndices.latitude], row[columnIndices.longitude]);
-                    addMarker(latLng, row[columnIndices.name], row[columnIndices.address], row[columnIndices.owner], row[columnIndices.tags], row[columnIndices.description], row[columnIndices.placeId]);
+                    addMarker(latLng, row[columnIndices.name], row[columnIndices.address], row[columnIndices.owner], row[columnIndices.tagsString], row[columnIndices.description], row[columnIndices.placeId]);
                 });
             } else {
                 console.log('No data found or empty rows.');
@@ -162,13 +162,13 @@ function addMarker(latLng, businessName, businessAddress, ownerName, tagsString,
 
     contentString += '</div>';
     
-    const tags = tagsString ? tagsString.split(", ") : [];
+    const tags = tagsString ? tagsString.split(", ").map(tag => tag.trim().toLowerCase()) : [];
 
     // Determine the icon based on the tags
     let iconUrl = iconUrls.defaultIcon; // Default icon
-    if (tags.includes("Wage theft")) {
+    if (tags.includes("wage theft")) {
         iconUrl = iconUrls.wageTheft; // icon for wage theft
-    } else if (tags.includes("Abusive management") || tags.includes("Intimidation")) {
+    } else if (tags.includes("abusive management") || tags.includes("intimidation")) {
         iconUrl = iconUrls.otherIssues; // icon for other issues
     }
 
