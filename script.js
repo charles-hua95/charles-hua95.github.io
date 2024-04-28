@@ -138,7 +138,7 @@ function fetchLocations() {
 const iconUrls = {
     defaultIcon: 'https://charles-hua95.github.io/basic-icon.png', // No specific tag
     wageTheft: 'https://charles-hua95.github.io/theft-icon.png', // Specific URL for "Wage theft"
-    otherIssues: 'https://charles-hua95.github.io/abuse.png' // Specific URL for "Abusive management" or "Intimidation"
+    otherIssues: 'https://charles-hua95.github.io/abuse-icon.png' // Specific URL for "Abusive management" or "Intimidation"
 };
 
 function addMarker(latLng, businessName, businessAddress, ownerName, tagsString, description, placeId) {
