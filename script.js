@@ -77,14 +77,6 @@ function loadGoogleMapsAPI(language) {
     document.head.appendChild(script);
 }
 
-
-window.onload = function() {
-    updateLanguage();
-    initMap();
-    loadGoogleMapsAPI(currentLanguage);
-};
-
-
 function fetchLocations() {
     const sheetId = '1tIqLf1ljbiG5Q0lf6Jcoc3I5hwFRayTCdiATgP98f38';
     const apiKey = 'AIzaSyAAWLLafU7wen4ObLkxT3rtY1jD39wne_4';
