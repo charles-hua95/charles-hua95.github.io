@@ -67,12 +67,35 @@ function loadGoogleMapsAPI(language) {
     document.head.appendChild(script);
 }
 
+// Function to translate text using Cloud Translation API
+async function translateText(text, targetLanguage) {
+    const apiKey = 'AIzaSyAAWLLafU7wen4ObLkxT3rtY1jD39wne_4';
+    const apiUrl = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
+    const requestBody = {
+        q: text,
+        target: targetLanguage
+    };
 
-window.onload = function() {
-    updateLanguage();
-    loadGoogleMapsAPI(currentLanguage);
-};
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        });
 
+        if (!response.ok) {
+            throw new Error('Translation request failed');
+        }
+
+        const data = await response.json();
+        return data.data.translations[0].translatedText;
+    } catch (error) {
+        console.error('Translation error:', error);
+        return null;
+    }
+}
 
 // Initialize the map
 window.initMap = function() {
@@ -167,75 +190,7 @@ async function addMarker(latLng, businessName, businessAddress, ownerName, tagsS
         title: `${businessName}`
     });
     
-    const infoWindow = new google.maps.InfoWindow({
-        content: contentString
-    });
-    
-    // Function to translate text using Cloud Translation API
-    async function translateText(text, targetLanguage) {
-        const apiKey = 'AIzaSyAAWLLafU7wen4ObLkxT3rtY1jD39wne_4';
-        const apiUrl = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
-        const requestBody = {
-            q: text,
-            target: targetLanguage
-        };
-
-        try {
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(requestBody)
-            });
-
-            if (!response.ok) {
-                throw new Error('Translation request failed');
-            }
-
-            const data = await response.json();
-            return data.data.translations[0].translatedText;
-        } catch (error) {
-            console.error('Translation error:', error);
-            return null;
-        }
-    }
-
-    const trans = translations[currentLanguage] || translations['zh-CN']; // Fallback to Chinese if undefined
-// Check if the current language is Chinese
-if (currentLanguage === 'zh-CN') {
-    // Translate only if the string is present
-    if (businessAddress) {
-        businessAddress = await translateText(businessAddress, 'zh-CN');
-    }
-    if (tagsString) {
-        tagsString = await translateText(tagsString, 'zh-CN');
-    }
-    if (description) {
-        description = await translateText(description, 'zh-CN');
-    }
-}
-
-// Construct contentString for infoWindow
-let contentString = `<div><h3>${trans.businessLabel}: ${businessName}</h3>`;
-if (placeId) {
-    contentString += `<div id="placePhoto-${placeId}"><em>${trans.loadingText}</em></div>`;
-}
-if (businessAddress) {
-    contentString += `<p><strong>${trans.addressLabel}:</strong> ${businessAddress}</p>`;
-}
-if (ownerName) {
-    contentString += `<p><strong>${trans.ownerLabel}:</strong> ${ownerName}</p>`;
-}
-if (tagsString) {
-    contentString += `<p><strong>${trans.practicesLabel}:</strong> ${tagsString}</p>`;
-}
-if (description) {
-    contentString += `<p><strong>${trans.descriptionLabel}:</strong> ${description}</p>`;
-}
-contentString += '</div>';
-    
-    
+    const infoWindow = new google.maps.InfoWindow();
     
     let isOpen = false;  // Track whether the infoWindow is open
 
@@ -244,6 +199,7 @@ contentString += '</div>';
             infoWindow.close();
             isOpen = false;  // Update the state to closed
         } else {
+            infoWindow.setContent(getContentString(businessName, businessAddress, ownerName, tagsString, description, placeId));
             infoWindow.open(map, marker);
             isOpen = true;   // Update the state to open
             if (placeId) {  // Load the photo if placeId is present
@@ -255,6 +211,38 @@ contentString += '</div>';
     });
 
     markers.push(marker);
+}
+
+async function getContentString(businessName, businessAddress, ownerName, tagsString, description, placeId) {
+    const trans = translations[currentLanguage] || translations['zh-CN']; // Fallback to Chinese if undefined
+    let contentString = '<div>';
+
+    // Translate text if current language is Chinese
+    if (currentLanguage === 'zh-CN') {
+        businessAddress = await translateText(businessAddress, 'zh-CN');
+        tagsString = await translateText(tagsString, 'zh-CN');
+        description = await translateText(description, 'zh-CN');
+    }
+
+    if (placeId) {
+        contentString += `<div id="placePhoto-${placeId}"><em>${trans.loadingText}</em></div>`;
+    }
+    if (businessAddress) {
+        contentString += `<p><strong>${trans.addressLabel}:</strong> ${businessAddress}</p>`;
+    }
+    if (ownerName) {
+        contentString += `<p><strong>${trans.ownerLabel}:</strong> ${ownerName}</p>`;
+    }
+    if (tagsString) {
+        contentString += `<p><strong>${trans.practicesLabel}:</strong> ${tagsString}</p>`;
+    }
+    if (description) {
+        contentString += `<p><strong>${trans.descriptionLabel}:</strong> ${description}</p>`;
+    }
+
+    contentString += '</div>';
+
+    return contentString;
 }
 
 function loadPlacePhoto(placeId, containerId) {
