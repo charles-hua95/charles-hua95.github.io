@@ -148,7 +148,7 @@ async function getContentString(businessName, businessAddress, ownerName, tagsSt
     }
     if (currentLanguage === 'en') {
         if(businessAddress){
-            contentString += `<p><strong>${trans.ownerLabel}:</strong> ${businessAddress}</p>`;
+            contentString += `<p><strong>${trans.addressLabel}:</strong> ${businessAddress}</p>`;
             }
     }
     if (translatedAddress) {
