@@ -126,7 +126,8 @@ async function getContentString(businessName, businessAddress, ownerName, tagsSt
     }
 
     if (placeId) {
-        contentString += `<div id="placePhoto-${placeId}"><em>${trans.loadingText}</em></div>`;
+        const containerId = `placePhoto-${placeId}`;
+        contentString += `<div id="${containerId}"><em>${trans.loadingText}</em></div>`;
     }
     if (businessAddress) {
         contentString += `<p><strong>${trans.addressLabel}:</strong> ${businessAddress}</p>`;
