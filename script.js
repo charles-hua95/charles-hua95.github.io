@@ -115,16 +115,19 @@ function fetchLocations() {
                     description: headers.indexOf("Description"),
                     latitude: headers.indexOf("Latitude"),
                     longitude: headers.indexOf("Longitude"),
-                    placeId: headers.indexOf("Place ID")
+                    placeId: headers.indexOf("Place ID"),
+                    verified:headers.indexOf("Verified")
                 };
 
                 console.log(`Column indices found:`, columnIndices);
 
                 // Process each row excluding the header
                 rows.slice(1).forEach(row => {
+                    // Check if "Verified" is "Yes" before adding marker
+                    if (row[columnIndices.verified] === "Yes") {
                     const latLng = new google.maps.LatLng(row[columnIndices.latitude], row[columnIndices.longitude]);
                     addMarker(latLng, row[columnIndices.name], row[columnIndices.address], row[columnIndices.owner], row[columnIndices.tagsString], row[columnIndices.description], row[columnIndices.placeId]);
-                });
+                }});
             } else {
                 console.log('No data found or empty rows.');
             }
