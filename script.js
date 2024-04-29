@@ -202,29 +202,38 @@ async function addMarker(latLng, businessName, businessAddress, ownerName, tagsS
     }
 
     const trans = translations[currentLanguage] || translations['zh-CN']; // Fallback to Chinese if undefined
-    let contentString = '<div>';
-
-    // Translate text if current language is Chinese
-    if (currentLanguage === 'zh-CN') {
-        businessAddress = await translateText(businessAddress, 'zh-CN');
-        tagsString = await translateText(tagsString, 'zh-CN');
-        description = await translateText(description, 'zh-CN');
-    }
-
-    if (placeId) {
-        contentString += `<div id="placePhoto-${placeId}"><em>${trans.loadingText}</em></div>`;
-    }
+// Check if the current language is Chinese
+if (currentLanguage === 'zh-CN') {
+    // Translate only if the string is present
     if (businessAddress) {
-        contentString += `<p><strong>${trans.addressLabel}:</strong> ${businessAddress}</p>`;
+        businessAddress = await translateText(businessAddress, 'zh-CN');
     }
     if (tagsString) {
-        contentString += `<p><strong>${trans.practicesLabel}:</strong> ${tagsString}</p>`;
+        tagsString = await translateText(tagsString, 'zh-CN');
     }
     if (description) {
-        contentString += `<p><strong>${trans.descriptionLabel}:</strong> ${description}</p>`;
+        description = await translateText(description, 'zh-CN');
     }
+}
 
-    contentString += '</div>';
+// Construct contentString for infoWindow
+let contentString = `<div><h3>${trans.businessLabel}: ${businessName}</h3>`;
+if (placeId) {
+    contentString += `<div id="placePhoto-${placeId}"><em>${trans.loadingText}</em></div>`;
+}
+if (businessAddress) {
+    contentString += `<p><strong>${trans.addressLabel}:</strong> ${businessAddress}</p>`;
+}
+if (ownerName) {
+    contentString += `<p><strong>${trans.ownerLabel}:</strong> ${ownerName}</p>`;
+}
+if (tagsString) {
+    contentString += `<p><strong>${trans.practicesLabel}:</strong> ${tagsString}</p>`;
+}
+if (description) {
+    contentString += `<p><strong>${trans.descriptionLabel}:</strong> ${description}</p>`;
+}
+contentString += '</div>';
     
     
     
