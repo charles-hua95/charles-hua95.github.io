@@ -240,7 +240,7 @@ async function translateText(text, targetLanguage) {
         console.error('Error translating text:', error);
         return text; // Return the original text in case of error
     }
-
+}
 
 
 function loadPlacePhoto(placeId, containerId) {
