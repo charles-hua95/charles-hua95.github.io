@@ -186,11 +186,8 @@ function addMarker(latLng, businessName, businessAddress, ownerName, tagsString,
         title: `${businessName}`
     });
     
-    const infoWindow = new google.maps.InfoWindow({
-        content: contentString
-    });
+    const infoWindow = new google.maps.InfoWindow();
     
-
     let isOpen = false;  // Track whether the infoWindow is open
 
     google.maps.event.addListener(marker, 'click', function () {
@@ -198,14 +195,30 @@ function addMarker(latLng, businessName, businessAddress, ownerName, tagsString,
             infoWindow.close();
             isOpen = false;  // Update the state to closed
         } else {
-            infoWindow.open(map, marker);
-            isOpen = true;   // Update the state to open
-            if (placeId) {  // Load the photo if placeId is present
-                loadPlacePhoto(placeId, `placePhoto-${placeId}`);
+            // Translate content to Simplified Chinese if current language is Chinese
+            if (currentLanguage === 'zh-CN') {
+                googleTranslate.translate(contentString, 'en', 'zh-CN', function (translatedText) {
+                    infoWindow.setContent(translatedText);
+                    infoWindow.open(map, marker);
+                    isOpen = true;   // Update the state to open
+                    if (placeId) {  // Load the photo if placeId is present
+                        loadPlacePhoto(placeId, `placePhoto-${placeId}`);
+                    } else {
+                        document.getElementById(`placePhoto-${placeId}`).innerHTML = '';
+                    }
+                });
             } else {
-                document.getElementById(`placePhoto-${placeId}`).innerHTML = '';
+                infoWindow.setContent(contentString);
+                infoWindow.open(map, marker);
+                isOpen = true;   // Update the state to open
+                if (placeId) {  // Load the photo if placeId is present
+                    loadPlacePhoto(placeId, `placePhoto-${placeId}`);
+                } else {
+                    document.getElementById(`placePhoto-${placeId}`).innerHTML = '';
+                }
+            }
         }
-    }});
+    });
 
     markers.push(marker);
 }
