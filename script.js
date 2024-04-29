@@ -144,65 +144,9 @@ const iconUrls = {
     otherIssues: 'https://charles-hua95.github.io/abuse-icon.png' // Specific URL for "Abusive management" or "Intimidation"
 };
 
-async function addMarker(latLng, businessName, businessAddress, ownerName, tagsString, description, placeId) {
-    // Function to translate text using Cloud Translation API
-    async function translateText(text, targetLanguage) {
-        const apiKey = 'AIzaSyAAWLLafU7wen4ObLkxT3rtY1jD39wne_4';
-        const apiUrl = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
-        const requestBody = {
-            q: text,
-            target: targetLanguage
-        };
-
-        try {
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(requestBody)
-            });
-
-            if (!response.ok) {
-                throw new Error('Translation request failed');
-            }
-
-            const data = await response.json();
-            return data.data.translations[0].translatedText;
-        } catch (error) {
-            console.error('Translation error:', error);
-            return null;
-        }
-    }
-
-    const trans = translations[currentLanguage] || translations['zh-CN']; // Fallback to Chinese if undefined
-    let contentString = '<div>';
-
-    // Translate text if current language is Chinese
-    if (currentLanguage === 'zh-CN') {
-        businessAddress = await translateText(businessAddress, 'zh-CN');
-        tagsString = await translateText(tagsString, 'zh-CN');
-        description = await translateText(description, 'zh-CN');
-    }
-
-    if (placeId) {
-        contentString += `<div id="placePhoto-${placeId}"><em>${trans.loadingText}</em></div>`;
-    }
-    if (businessAddress) {
-        contentString += `<p><strong>${trans.addressLabel}:</strong> ${businessAddress}</p>`;
-    }
-    if (tagsString) {
-        contentString += `<p><strong>${trans.practicesLabel}:</strong> ${tagsString}</p>`;
-    }
-    if (description) {
-        contentString += `<p><strong>${trans.descriptionLabel}:</strong> ${description}</p>`;
-    }
-
-    contentString += '</div>';
-    
+function addMarker(latLng, businessName, businessAddress, ownerName, tagsString, description, placeId) {
     const tags = tagsString ? tagsString.split(", ").map(tag => tag.trim().toLowerCase()) : [];
-
-    // Determine the icon based on the tags
+       // Determine the icon based on the tags
     let iconUrl = iconUrls.defaultIcon; // Default icon
     if (tags.includes("wage theft")) {
         iconUrl = iconUrls.wageTheft; // icon for wage theft
@@ -212,6 +156,26 @@ async function addMarker(latLng, businessName, businessAddress, ownerName, tagsS
 
     console.log(`Adding marker at ${latLng.toString()}`);
 
+    const trans = translations[currentLanguage] || translations['zh-CN']; // Fallback to Chinese if undefined
+    let contentString = `<div><h3>${trans.businessLabel}: ${businessName}</h3>`;
+    if (placeId) {
+        contentString += `<div id="placePhoto-${placeId}"><em>${trans.loadingText}</em></div>`;
+    }
+    if (businessAddress) {
+        contentString += `<p><strong>${trans.addressLabel}:</strong> ${businessAddress}</p>`;
+    }
+    if (ownerName) {
+        contentString += `<p><strong>${trans.ownerLabel}:</strong> ${ownerName}</p>`;
+    }
+    if (tagsString) {
+        contentString += `<p><strong>${trans.practicesLabel}:</strong> ${translateText(tagsString)}</p>`;
+    }
+    if (description) {
+        contentString += `<p><strong>${trans.descriptionLabel}:</strong> ${translateText(description)}</p>`;
+    }
+
+    contentString += '</div>';
+    
     const marker = new google.maps.Marker({
         position: latLng,
         map: map,
@@ -245,6 +209,40 @@ async function addMarker(latLng, businessName, businessAddress, ownerName, tagsS
 
     markers.push(marker);
 }
+
+
+// Function to translate text using Cloud Translation API
+async function translateText(text, targetLanguage) {
+    const apiKey = 'AIzaSyAAWLLafU7wen4ObLkxT3rtY1jD39wne_4';
+    const sourceLanguage = 'en'; // Assuming the source language is English
+    const targetLanguage = currentLanguage === 'zh-CN' ? 'zh-CN' : 'en'; // Translate to Chinese if current language is Chinese, otherwise keep it in English
+    
+    const url = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
+    const data = {
+        q: text,
+        source: sourceLanguage,
+        target: targetLanguage,
+        format: 'text'
+    };
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const translatedData = await response.json();
+        const translatedText = translatedData.data.translations[0].translatedText;
+        return translatedText;
+    } catch (error) {
+        console.error('Error translating text:', error);
+        return text; // Return the original text in case of error
+    }
+
+
 
 function loadPlacePhoto(placeId, containerId) {
     const service = new google.maps.places.PlacesService(map);
