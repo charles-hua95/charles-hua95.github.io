@@ -143,11 +143,27 @@ async function getContentString(businessName, businessAddress, ownerName, tagsSt
         const containerId = `placePhoto-${placeId}`;
         contentString += `<div id="${containerId}"><em>${trans.loadingText}</em></div>`;
     }
+    if (businessName) {
+        contentString += `<p><strong>${trans.businessLabel}:</strong> ${businessName}</p>`;
+    }
+    if (currentLanguage === 'en') {
+        if(businessAddress){
+            contentString += `<p><strong>${trans.ownerLabel}:</strong> ${businessAddress}</p>`;
+            }
+    }
     if (translatedAddress) {
         contentString += `<p><strong>${trans.addressLabel}:</strong> ${translatedAddress}</p>`;
     }
     if (ownerName) {
         contentString += `<p><strong>${trans.ownerLabel}:</strong> ${ownerName}</p>`;
+    }
+    if (currentLanguage === 'en'){
+        if (tagsString) {
+            contentString += `<p><strong>${trans.practicesLabel}:</strong> ${tagsString}</p>`;
+        }
+        if (description) {
+            contentString += `<p><strong>${trans.descriptionLabel}:</strong> ${description}</p>`;
+        }
     }
     if (translatedTags) {
         contentString += `<p><strong>${trans.practicesLabel}:</strong> ${translatedTags}</p>`;
