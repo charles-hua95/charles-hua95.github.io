@@ -188,6 +188,11 @@ function addMarker(latLng, businessName, businessAddress, ownerName, tagsString,
     
     const infoWindow = new google.maps.InfoWindow();
     
+    // Define googleTranslateElementInit function
+    function googleTranslateElementInit() {
+        new google.translate.TranslateElement({ pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE }, 'google_translate_element');
+    }
+
     let isOpen = false;  // Track whether the infoWindow is open
 
     google.maps.event.addListener(marker, 'click', function () {
