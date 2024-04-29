@@ -33,16 +33,6 @@ const translations = {
     }
 };
 
-// Initialize the map
-function initMap() {
-    const chinatown = {lat: 43.653023233458946, lng: -79.39743229321462};
-    map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 16,
-        center: chinatown,
-        styles: mapStyles
-    });
-    fetchLocations();
-}
 
 document.getElementById('langEnBtn').addEventListener('click', function() {
     currentLanguage = 'en';
@@ -75,6 +65,24 @@ function loadGoogleMapsAPI(language) {
     script.async = true;
     script.defer = true;
     document.head.appendChild(script);
+}
+
+
+window.onload = function() {
+    updateLanguage();
+    loadGoogleMapsAPI(currentLanguage);
+};
+
+
+// Initialize the map
+window.initMap = function() {
+    const chinatown = {lat: 43.653023233458946, lng: -79.39743229321462};
+    map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 16,
+        center: chinatown,
+        styles: mapStyles
+    });
+    fetchLocations();
 }
 
 function fetchLocations() {
