@@ -73,6 +73,36 @@ function loadGoogleMapsAPI(language) {
     document.head.appendChild(script);
 }
 
+// Function to translate text using Cloud Translation API
+async function translateText(text, targetLanguage) {
+    const apiKey = 'AIzaSyAAWLLafU7wen4ObLkxT3rtY1jD39wne_4';
+    const apiUrl = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
+    const requestBody = {
+        q: text,
+        target: targetLanguage
+    };
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+            throw new Error('Translation request failed');
+        }
+
+        const data = await response.json();
+        return data.data.translations[0].translatedText;
+    } catch (error) {
+        console.error('Translation error:', error);
+        return null;
+    }
+}
+
 // Initialize the map
 window.initMap = function() {
     const chinatown = {lat: 43.653023233458946, lng: -79.39743229321462};
