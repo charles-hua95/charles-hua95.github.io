@@ -166,22 +166,11 @@ async function addMarker(latLng, businessName, businessAddress, ownerName, tagsS
         },
         title: `${businessName}`
     });
-   
-    google.maps.event.addListener(marker, 'click', function () {
-        if (isOpen) {
-            infoWindow.close();
-            isOpen = false;  // Update the state to closed
-        } else {
-            infoWindow.open(map, marker);
-            isOpen = true;   // Update the state to open
-            if (placeId) {  // Load the photo if placeId is present
-                loadPlacePhoto(placeId, `placePhoto-${placeId}`);
-            } else {
-                document.getElementById(`placePhoto-${placeId}`).innerHTML = '';
-            }
-        }
+    
+    const infoWindow = new google.maps.InfoWindow({
+        content: contentString
     });
-
+    
     // Function to translate text using Cloud Translation API
     async function translateText(text, targetLanguage) {
         const apiKey = 'AIzaSyAAWLLafU7wen4ObLkxT3rtY1jD39wne_4';
@@ -237,13 +226,24 @@ async function addMarker(latLng, businessName, businessAddress, ownerName, tagsS
 
     contentString += '</div>';
     
-        const infoWindow = new google.maps.InfoWindow({
-        content: contentString
-    });
+    
     
     let isOpen = false;  // Track whether the infoWindow is open
 
-
+    google.maps.event.addListener(marker, 'click', function () {
+        if (isOpen) {
+            infoWindow.close();
+            isOpen = false;  // Update the state to closed
+        } else {
+            infoWindow.open(map, marker);
+            isOpen = true;   // Update the state to open
+            if (placeId) {  // Load the photo if placeId is present
+                loadPlacePhoto(placeId, `placePhoto-${placeId}`);
+            } else {
+                document.getElementById(`placePhoto-${placeId}`).innerHTML = '';
+            }
+        }
+    });
 
     markers.push(marker);
 }
