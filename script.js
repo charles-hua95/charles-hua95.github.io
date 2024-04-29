@@ -145,6 +145,43 @@ const iconUrls = {
 };
 
 async function addMarker(latLng, businessName, businessAddress, ownerName, tagsString, description, placeId) {
+    const tags = tagsString ? tagsString.split(", ").map(tag => tag.trim().toLowerCase()) : [];
+
+    // Determine the icon based on the tags
+    let iconUrl = iconUrls.defaultIcon; // Default icon
+    if (tags.includes("abusive management") || tags.includes("intimidation")) {
+        iconUrl = iconUrls.otherIssues; // icon for wage theft
+    } else if (tags.includes("wage theft")) {
+        iconUrl = iconUrls.wageTheft; // icon for other issues
+    }
+
+    console.log(`Adding marker at ${latLng.toString()}`);
+
+    const marker = new google.maps.Marker({
+        position: latLng,
+        map: map,
+        icon: {
+            url: iconUrl,
+            scaledSize: new google.maps.Size(50, 50)
+        },
+        title: `${businessName}`
+    });
+   
+    google.maps.event.addListener(marker, 'click', function () {
+        if (isOpen) {
+            infoWindow.close();
+            isOpen = false;  // Update the state to closed
+        } else {
+            infoWindow.open(map, marker);
+            isOpen = true;   // Update the state to open
+            if (placeId) {  // Load the photo if placeId is present
+                loadPlacePhoto(placeId, `placePhoto-${placeId}`);
+            } else {
+                document.getElementById(`placePhoto-${placeId}`).innerHTML = '';
+            }
+        }
+    });
+
     // Function to translate text using Cloud Translation API
     async function translateText(text, targetLanguage) {
         const apiKey = 'AIzaSyAAWLLafU7wen4ObLkxT3rtY1jD39wne_4';
@@ -200,48 +237,13 @@ async function addMarker(latLng, businessName, businessAddress, ownerName, tagsS
 
     contentString += '</div>';
     
-    const tags = tagsString ? tagsString.split(", ").map(tag => tag.trim().toLowerCase()) : [];
-
-    // Determine the icon based on the tags
-    let iconUrl = iconUrls.defaultIcon; // Default icon
-    if (tags.includes("wage theft")) {
-        iconUrl = iconUrls.wageTheft; // icon for wage theft
-    } else if (tags.includes("abusive management") || tags.includes("intimidation")) {
-        iconUrl = iconUrls.otherIssues; // icon for other issues
-    }
-
-    console.log(`Adding marker at ${latLng.toString()}`);
-
-    const marker = new google.maps.Marker({
-        position: latLng,
-        map: map,
-        icon: {
-            url: iconUrl,
-            scaledSize: new google.maps.Size(50, 50)
-        },
-        title: `${businessName}`
-    });
-    
-    const infoWindow = new google.maps.InfoWindow({
+        const infoWindow = new google.maps.InfoWindow({
         content: contentString
     });
     
     let isOpen = false;  // Track whether the infoWindow is open
 
-    google.maps.event.addListener(marker, 'click', function () {
-        if (isOpen) {
-            infoWindow.close();
-            isOpen = false;  // Update the state to closed
-        } else {
-            infoWindow.open(map, marker);
-            isOpen = true;   // Update the state to open
-            if (placeId) {  // Load the photo if placeId is present
-                loadPlacePhoto(placeId, `placePhoto-${placeId}`);
-            } else {
-                document.getElementById(`placePhoto-${placeId}`).innerHTML = '';
-            }
-        }
-    });
+
 
     markers.push(marker);
 }
