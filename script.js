@@ -80,6 +80,7 @@ function loadGoogleMapsAPI(language) {
 
 window.onload = function() {
     updateLanguage();
+    initMap();
     loadGoogleMapsAPI(currentLanguage);
 };
 
