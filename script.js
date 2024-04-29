@@ -174,12 +174,14 @@ async function addMarker(latLng, businessName, businessAddress, ownerName, tagsS
     
     let isOpen = false;  // Track whether the infoWindow is open
 
-    google.maps.event.addListener(marker, 'click', function () {
+    google.maps.event.addListener(marker, 'click', async function () {
         if (isOpen) {
             infoWindow.close();
             isOpen = false;  // Update the state to closed
         } else {
-            infoWindow.setContent(getContentString(businessName, businessAddress, ownerName, tagsString, description, placeId));
+            const contentString = await getContentString(businessName, businessAddress, ownerName, tagsString, description, placeId);
+            console.log('Content String:', contentString); // Log the content string
+            infoWindow.setContent(contentString);
             infoWindow.open(map, marker);
             isOpen = true;   // Update the state to open
             if (placeId) {  // Load the photo if placeId is present
