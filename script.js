@@ -73,36 +73,6 @@ function loadGoogleMapsAPI(language) {
     document.head.appendChild(script);
 }
 
-// Function to translate text using Cloud Translation API
-async function translateText(text, targetLanguage) {
-    const apiKey = 'AIzaSyAAWLLafU7wen4ObLkxT3rtY1jD39wne_4';
-    const apiUrl = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
-    const requestBody = {
-        q: text,
-        target: targetLanguage
-    };
-
-    try {
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(requestBody)
-        });
-
-        if (!response.ok) {
-            throw new Error('Translation request failed');
-        }
-
-        const data = await response.json();
-        return data.data.translations[0].translatedText;
-    } catch (error) {
-        console.error('Translation error:', error);
-        return null;
-    }
-}
-
 // Initialize the map
 window.initMap = function() {
     const chinatown = {lat: 43.653023233458946, lng: -79.39743229321462};
@@ -114,32 +84,46 @@ window.initMap = function() {
     fetchLocations();
 }
 
-async function getContentString(businessName, businessAddress, ownerName, tagsString, description, placeId) {
-    const trans = translations[currentLanguage] || translations['zh-CN']; // Fallback to Chinese if undefined
-    let contentString = '<div>';
-
-    // Translate text if current language is Chinese
-    if (currentLanguage === 'zh-CN') {
-        businessAddress = await translateText(businessAddress, 'zh-CN');
-        tagsString = await translateText(tagsString, 'zh-CN');
-        description = await translateText(description, 'zh-CN');
+async function getTranslatedTextWithFallback(text, language) {
+    try {
+        const translatedText = await translateText(text, language);
+        return translatedText || text; // If translation is empty, fallback to original text
+    } catch (error) {
+        console.error('Translation error:', error);
+        return text; // Fallback to original text in case of error
     }
+}
+
+// Modify getContentString function to fetch translations in parallel
+async function getContentString(businessName, businessAddress, ownerName, tagsString, description, placeId) {
+    let contentString = '<div>';
+    const trans = translations[currentLanguage] || translations['zh-CN'] || translations['en']; // Fallback to default language
+
+    const translationsPromises = [];
+    if (currentLanguage === 'zh-CN') {
+        translationsPromises.push(getTranslatedTextWithFallback(businessAddress, 'zh-CN'));
+        translationsPromises.push(getTranslatedTextWithFallback(tagsString, 'zh-CN'));
+        translationsPromises.push(getTranslatedTextWithFallback(description, 'zh-CN'));
+    }
+
+    // Wait for all translations to complete
+    const [translatedAddress, translatedTags, translatedDescription] = await Promise.all(translationsPromises);
 
     if (placeId) {
         const containerId = `placePhoto-${placeId}`;
         contentString += `<div id="${containerId}"><em>${trans.loadingText}</em></div>`;
     }
-    if (businessAddress) {
-        contentString += `<p><strong>${trans.addressLabel}:</strong> ${businessAddress}</p>`;
+    if (translatedAddress) {
+        contentString += `<p><strong>${trans.addressLabel}:</strong> ${translatedAddress}</p>`;
     }
     if (ownerName) {
         contentString += `<p><strong>${trans.ownerLabel}:</strong> ${ownerName}</p>`;
     }
-    if (tagsString) {
-        contentString += `<p><strong>${trans.practicesLabel}:</strong> ${tagsString}</p>`;
+    if (translatedTags) {
+        contentString += `<p><strong>${trans.practicesLabel}:</strong> ${translatedTags}</p>`;
     }
-    if (description) {
-        contentString += `<p><strong>${trans.descriptionLabel}:</strong> ${description}</p>`;
+    if (translatedDescription) {
+        contentString += `<p><strong>${trans.descriptionLabel}:</strong> ${translatedDescription}</p>`;
     }
 
     contentString += '</div>';
@@ -147,6 +131,7 @@ async function getContentString(businessName, businessAddress, ownerName, tagsSt
     return contentString;
 }
 
+// Modify addMarker function to use getContentString
 async function addMarker(latLng, businessName, businessAddress, ownerName, tagsString, description, placeId) {
     const tags = tagsString ? tagsString.split(", ").map(tag => tag.trim().toLowerCase()) : [];
 
