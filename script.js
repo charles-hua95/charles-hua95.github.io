@@ -33,6 +33,12 @@ const translations = {
     }
 };
 
+const iconUrls = {
+    defaultIcon: 'https://charles-hua95.github.io/basic-icon.png', // No specific tag
+    wageTheft: 'https://charles-hua95.github.io/theft-icon.png', // Specific URL for "Wage theft"
+    otherIssues: 'https://charles-hua95.github.io/abuse-icon.png' // Specific URL for "Abusive management" or "Intimidation"
+};
+
 
 document.getElementById('langEnBtn').addEventListener('click', function() {
     currentLanguage = 'en';
@@ -108,6 +114,84 @@ window.initMap = function() {
     fetchLocations();
 }
 
+async function getContentString(businessName, businessAddress, ownerName, tagsString, description, placeId) {
+    const trans = translations[currentLanguage] || translations['zh-CN']; // Fallback to Chinese if undefined
+    let contentString = '<div>';
+
+    // Translate text if current language is Chinese
+    if (currentLanguage === 'zh-CN') {
+        businessAddress = await translateText(businessAddress, 'zh-CN');
+        tagsString = await translateText(tagsString, 'zh-CN');
+        description = await translateText(description, 'zh-CN');
+    }
+
+    if (placeId) {
+        contentString += `<div id="placePhoto-${placeId}"><em>${trans.loadingText}</em></div>`;
+    }
+    if (businessAddress) {
+        contentString += `<p><strong>${trans.addressLabel}:</strong> ${businessAddress}</p>`;
+    }
+    if (ownerName) {
+        contentString += `<p><strong>${trans.ownerLabel}:</strong> ${ownerName}</p>`;
+    }
+    if (tagsString) {
+        contentString += `<p><strong>${trans.practicesLabel}:</strong> ${tagsString}</p>`;
+    }
+    if (description) {
+        contentString += `<p><strong>${trans.descriptionLabel}:</strong> ${description}</p>`;
+    }
+
+    contentString += '</div>';
+
+    return contentString;
+}
+
+async function addMarker(latLng, businessName, businessAddress, ownerName, tagsString, description, placeId) {
+    const tags = tagsString ? tagsString.split(", ").map(tag => tag.trim().toLowerCase()) : [];
+
+    // Determine the icon based on the tags
+    let iconUrl = iconUrls.defaultIcon; // Default icon
+    if (tags.includes("abusive management") || tags.includes("intimidation")) {
+        iconUrl = iconUrls.otherIssues; // icon for wage theft
+    } else if (tags.includes("wage theft")) {
+        iconUrl = iconUrls.wageTheft; // icon for other issues
+    }
+
+    console.log(`Adding marker at ${latLng.toString()}`);
+
+    const marker = new google.maps.Marker({
+        position: latLng,
+        map: map,
+        icon: {
+            url: iconUrl,
+            scaledSize: new google.maps.Size(50, 50)
+        },
+        title: `${businessName}`
+    });
+    
+    const infoWindow = new google.maps.InfoWindow();
+    
+    let isOpen = false;  // Track whether the infoWindow is open
+
+    google.maps.event.addListener(marker, 'click', function () {
+        if (isOpen) {
+            infoWindow.close();
+            isOpen = false;  // Update the state to closed
+        } else {
+            infoWindow.setContent(getContentString(businessName, businessAddress, ownerName, tagsString, description, placeId));
+            infoWindow.open(map, marker);
+            isOpen = true;   // Update the state to open
+            if (placeId) {  // Load the photo if placeId is present
+                loadPlacePhoto(placeId, `placePhoto-${placeId}`);
+            } else {
+                document.getElementById(`placePhoto-${placeId}`).innerHTML = '';
+            }
+        }
+    });
+
+    markers.push(marker);
+}
+
 function fetchLocations() {
     const sheetId = '1tIqLf1ljbiG5Q0lf6Jcoc3I5hwFRayTCdiATgP98f38';
     const apiKey = 'AIzaSyAAWLLafU7wen4ObLkxT3rtY1jD39wne_4';
@@ -159,90 +243,6 @@ function fetchLocations() {
             console.error('Error fetching data: ', error);
             alert('Failed to load data from Google Sheets. Check the console for more details.');
         });
-}
-
-const iconUrls = {
-    defaultIcon: 'https://charles-hua95.github.io/basic-icon.png', // No specific tag
-    wageTheft: 'https://charles-hua95.github.io/theft-icon.png', // Specific URL for "Wage theft"
-    otherIssues: 'https://charles-hua95.github.io/abuse-icon.png' // Specific URL for "Abusive management" or "Intimidation"
-};
-
-async function addMarker(latLng, businessName, businessAddress, ownerName, tagsString, description, placeId) {
-    const tags = tagsString ? tagsString.split(", ").map(tag => tag.trim().toLowerCase()) : [];
-
-    // Determine the icon based on the tags
-    let iconUrl = iconUrls.defaultIcon; // Default icon
-    if (tags.includes("abusive management") || tags.includes("intimidation")) {
-        iconUrl = iconUrls.otherIssues; // icon for wage theft
-    } else if (tags.includes("wage theft")) {
-        iconUrl = iconUrls.wageTheft; // icon for other issues
-    }
-
-    console.log(`Adding marker at ${latLng.toString()}`);
-
-    const marker = new google.maps.Marker({
-        position: latLng,
-        map: map,
-        icon: {
-            url: iconUrl,
-            scaledSize: new google.maps.Size(50, 50)
-        },
-        title: `${businessName}`
-    });
-    
-    const infoWindow = new google.maps.InfoWindow();
-    
-    let isOpen = false;  // Track whether the infoWindow is open
-
-    google.maps.event.addListener(marker, 'click', function () {
-        if (isOpen) {
-            infoWindow.close();
-            isOpen = false;  // Update the state to closed
-        } else {
-            infoWindow.setContent(getContentString(businessName, businessAddress, ownerName, tagsString, description, placeId));
-            infoWindow.open(map, marker);
-            isOpen = true;   // Update the state to open
-            if (placeId) {  // Load the photo if placeId is present
-                loadPlacePhoto(placeId, `placePhoto-${placeId}`);
-            } else {
-                document.getElementById(`placePhoto-${placeId}`).innerHTML = '';
-            }
-        }
-    });
-
-    markers.push(marker);
-}
-
-async function getContentString(businessName, businessAddress, ownerName, tagsString, description, placeId) {
-    const trans = translations[currentLanguage] || translations['zh-CN']; // Fallback to Chinese if undefined
-    let contentString = '<div>';
-
-    // Translate text if current language is Chinese
-    if (currentLanguage === 'zh-CN') {
-        businessAddress = await translateText(businessAddress, 'zh-CN');
-        tagsString = await translateText(tagsString, 'zh-CN');
-        description = await translateText(description, 'zh-CN');
-    }
-
-    if (placeId) {
-        contentString += `<div id="placePhoto-${placeId}"><em>${trans.loadingText}</em></div>`;
-    }
-    if (businessAddress) {
-        contentString += `<p><strong>${trans.addressLabel}:</strong> ${businessAddress}</p>`;
-    }
-    if (ownerName) {
-        contentString += `<p><strong>${trans.ownerLabel}:</strong> ${ownerName}</p>`;
-    }
-    if (tagsString) {
-        contentString += `<p><strong>${trans.practicesLabel}:</strong> ${tagsString}</p>`;
-    }
-    if (description) {
-        contentString += `<p><strong>${trans.descriptionLabel}:</strong> ${description}</p>`;
-    }
-
-    contentString += '</div>';
-
-    return contentString;
 }
 
 function loadPlacePhoto(placeId, containerId) {
